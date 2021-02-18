@@ -1,0 +1,20 @@
+{
+  "name": "setting name",
+  "data_path": "",
+  "min_words_count": 3,
+  "max_words_count": 30,
+  "min_word_len": 2,
+  "max_word_len": 20,
+  "min_class_elements": 200,
+  "use_stop_words": true,
+  "stop_words": "доброе;утро;добрый;добры;доброго;добрий;добрій;день;вечер;вечора;утро;ранку;ранок;дня;ночь;спасибо;помочь;заявка;просьба;оперативно;заранее;дякую;здравствуйте;кг;шт;грн;fw:;re:;fw;re;fwd:;fwd;SC-;[EMAIL SECURITY];[SPAM];``;..;--;-/;mailto;./-;див;тел;внутрішній",
+  "clean_email": true,
+  "email_setting": {
+    "signatures": "З повагою, С уважением, з найкращими, from, з повагю, повагою, _______________"
+  },
+  "use_words_normalization": true,
+  "words_normalization_setting": {
+    "russian": true,
+    "ukrainian": true
+  }
+}
