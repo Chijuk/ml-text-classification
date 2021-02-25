@@ -4,8 +4,12 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
+pandas = "*"
+nltk = "*"
+flashtext = "*"
 
 [dev-packages]
+jupyter = "*"
 
 [requires]
 python_version = "3.8"
