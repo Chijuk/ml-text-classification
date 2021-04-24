@@ -1,0 +1,24 @@
+{
+  "name": "cleaner_setting_name",
+  "data_path": "\\example\\path",
+  "log_path": "\\logs",
+  "min_words_count": 3,
+  "max_words_count": 30,
+  "min_word_len": 2,
+  "max_word_len": 20,
+  "max_text_length": 8000,
+  "clean_stop_words": true,
+  "custom_stop_words_path": "\\stop_words\\path",
+  "use_uk_stop_words": true,
+  "use_ru_stop_words": true,
+  "clean_email": true,
+  "email_setting": {
+    "signatures": "З повагою, С уважением, з найкращими, from, з повагю, повагою, _______________"
+  },
+  "clean_html": true,
+  "use_words_lemmatization": true,
+  "words_lemmatization_setting": {
+    "russian": true,
+    "ukrainian": true
+  }
+}

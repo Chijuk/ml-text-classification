@@ -4,8 +4,19 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
+pandas = "*"
+nltk = "*"
+flashtext = "*"
+bs4 = "*"
+pymorphy2 = "*"
+fasttext = "*"
+keras = "*"
+tensorflow = "2.4.1"
+imblearn = "*"
+pymorphy2-dicts-uk = "*"
 
 [dev-packages]
+jupyter = "*"
 
 [requires]
 python_version = "3.8"
