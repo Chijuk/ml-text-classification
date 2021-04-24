@@ -32,3 +32,21 @@ def init_logging(file_name: str) -> None:
     logger.setLevel(logging.DEBUG)
     logger.addHandler(stream_handler)
     logger.addHandler(file_handler)
+
+
+def profile(fn):
+    """
+    Decorator used to profile method execution time
+    """
+    import time
+    from functools import wraps
+    log = logging.getLogger("profile")
+
+    @wraps(fn)
+    def with_profiling(*args, **kwargs):
+        start_time = time.time()
+        ret = fn(*args, **kwargs)
+        log.info('Execution of ' + fn.__name__ + ": %.3f seconds" % (time.time() - start_time))
+        return ret
+
+    return with_profiling

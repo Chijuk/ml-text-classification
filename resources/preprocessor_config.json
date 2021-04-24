@@ -6,7 +6,8 @@
   "max_words_count": 30,
   "min_word_len": 2,
   "max_word_len": 20,
-  "min_class_elements": 200,
+  "max_text_length": 8000,
+  "clean_stop_words": true,
   "custom_stop_words_path": "\\stop_words\\path",
   "use_uk_stop_words": true,
   "use_ru_stop_words": true,
@@ -14,8 +15,9 @@
   "email_setting": {
     "signatures": "З повагою, С уважением, з найкращими, from, з повагю, повагою, _______________"
   },
-  "use_words_normalization": true,
-  "words_normalization_setting": {
+  "clean_html": true,
+  "use_words_lemmatization": true,
+  "words_lemmatization_setting": {
     "russian": true,
     "ukrainian": true
   }

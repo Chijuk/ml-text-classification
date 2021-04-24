@@ -7,6 +7,13 @@ name = "pypi"
 pandas = "*"
 nltk = "*"
 flashtext = "*"
+bs4 = "*"
+pymorphy2 = "*"
+fasttext = "*"
+keras = "*"
+tensorflow = "2.4.1"
+imblearn = "*"
+pymorphy2-dicts-uk = "*"
 
 [dev-packages]
 jupyter = "*"
