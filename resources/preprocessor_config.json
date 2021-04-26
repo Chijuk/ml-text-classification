@@ -1,16 +1,19 @@
 {
   "name": "cleaner_setting_name",
-  "data_path": "\\example\\path",
-  "log_path": "\\logs",
+  "input_data_path": "data\\input_data_path.csv",
+  "output_data_path": "data\\output_data_path.csv",
+  "log_path": "logs",
   "min_words_count": 3,
   "max_words_count": 30,
   "min_word_len": 2,
   "max_word_len": 20,
-  "max_text_length": 8000,
   "clean_stop_words": true,
-  "custom_stop_words_path": "\\stop_words\\path",
-  "use_uk_stop_words": true,
-  "use_ru_stop_words": true,
+  "stop_words_settings": {
+    "use_uk_stop_words": true,
+    "use_ru_stop_words": true,
+    "custom_stop_words_path": "\\stop_words\\path",
+    "use_file_cleanup": []
+  },
   "clean_email": true,
   "email_setting": {
     "signatures": "З повагою, С уважением, з найкращими, from, з повагю, повагою, _______________"

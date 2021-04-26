@@ -9,11 +9,12 @@ nltk = "*"
 flashtext = "*"
 bs4 = "*"
 pymorphy2 = "*"
+pymorphy2-dicts-uk = "*"
+pymorphy2-dicts-ru = "*"
 fasttext = "*"
 keras = "*"
 tensorflow = "2.4.1"
 imblearn = "*"
-pymorphy2-dicts-uk = "*"
 
 [dev-packages]
 jupyter = "*"
