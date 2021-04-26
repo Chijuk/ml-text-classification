@@ -4,6 +4,7 @@ import sys
 
 import pandas as pd
 from flashtext import KeywordProcessor
+from tqdm.auto import tqdm
 
 import logger_utils
 import stop_words_utils
@@ -18,7 +19,8 @@ def data_preprocess(setting: CleanerSetting, stop_words: KeywordProcessor) -> No
     data = __read_data(setting)
 
     log.info("Start text cleaning")
-    data["text"] = data["text"].apply(text_utils.clean_text, args=(setting, stop_words))
+    tqdm.pandas(desc="cleaning text", ncols=100, mininterval=1, unit="row", colour="green")
+    data["text"] = data["text"].progress_apply(text_utils.clean_text, args=(setting, stop_words))
     data = data[data['text'] != ""]
     data.reset_index(drop=True)
     log.info("Cleaning finished. Saving to csv...")

@@ -15,6 +15,7 @@ fasttext = "*"
 keras = "*"
 tensorflow = "2.4.1"
 imblearn = "*"
+tqdm = "*"
 
 [dev-packages]
 jupyter = "*"
