@@ -36,17 +36,23 @@ class StopWordsSettings:
         self.use_file_cleanup = use_file_cleanup
 
 
-class CleanerSetting:
+class BaseSetting:
     def __init__(self, **kwargs) -> None:
         if kwargs['name'] == "": raise ValueError("name is empty")
         self.name = kwargs['name']
-        if kwargs['input_data_path'] == "":
-            raise ValueError("input_data_path is empty")
-        if kwargs['output_data_path'] == "":
-            raise ValueError("output_data_path is empty")
+        if kwargs['input_data_path'] == "": raise ValueError("input_data_path is empty")
         self.input_data_path = kwargs['input_data_path']
+        if kwargs['output_data_path'] == "": raise ValueError("output_data_path is empty")
         self.output_data_path = kwargs['output_data_path']
+        if kwargs['log_path'] == "": raise ValueError("log_path is empty")
         self.log_path = kwargs['log_path']
+
+
+class CleanerSetting(BaseSetting):
+    def __init__(self, **kwargs) -> None:
+        super().__init__(**kwargs)
+        self.drop_all_duplicates = kwargs['drop_all_duplicates']
+        self.drop_duplicates_class_list = kwargs['drop_duplicates_class_list']
         self.min_words_count = kwargs['min_words_count']
         self.max_words_count = kwargs['max_words_count']
         self.min_word_len = kwargs['min_word_len']
@@ -60,12 +66,19 @@ class CleanerSetting:
         self.words_lemmatization_setting = WordLemmatizationSetting(**kwargs['words_lemmatization_setting'])
 
 
-def get_setting(path: str, setting_type: SettingType) -> CleanerSetting:
+class TrainerSetting(BaseSetting):
+    def __init__(self, **kwargs) -> None:
+        super().__init__(**kwargs)
+        self.use_data_balancing = kwargs['use_data_balancing']
+        self.data_balancing_setting = DataBalancingSetting(**kwargs['data_balancing_setting'])
+
+
+def get_setting(path: str, setting_type: SettingType):
     """Get settings object deserialized from JSON
 
     :param path: path to settings file
     :param setting_type: enum SettingType
-    :return: CleanerSetting() for SettingType.cleaner
+    :return: class extended from BaseSetting
     :raises FileNotFoundError: if path is empty
     """
     if path == "":
@@ -76,6 +89,7 @@ def get_setting(path: str, setting_type: SettingType) -> CleanerSetting:
             # settings.validate()
             return settings
         elif setting_type == SettingType.trainer:
-            pass
+            settings = TrainerSetting(**json.load(file))
+            return settings
         else:
             raise TypeError("Unknown setting type %s" % setting_type)
