@@ -3,6 +3,12 @@
   "input_data_path": "data\\input_data_path.csv",
   "output_data_path": "data\\output_data_path.csv",
   "log_path": "logs",
+  "drop_all_duplicates": false,
+  "drop_duplicates_class_list": [
+    1234,
+    4567,
+    7890
+  ],
   "min_words_count": 3,
   "max_words_count": 30,
   "min_word_len": 2,

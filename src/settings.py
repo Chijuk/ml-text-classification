@@ -42,6 +42,8 @@ class BaseSetting:
         self.name = kwargs['name']
         if kwargs['input_data_path'] == "": raise ValueError("input_data_path is empty")
         self.input_data_path = kwargs['input_data_path']
+        if kwargs['output_data_path'] == "": raise ValueError("output_data_path is empty")
+        self.output_data_path = kwargs['output_data_path']
         if kwargs['log_path'] == "": raise ValueError("log_path is empty")
         self.log_path = kwargs['log_path']
 
@@ -49,8 +51,8 @@ class BaseSetting:
 class CleanerSetting(BaseSetting):
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
-        if kwargs['output_data_path'] == "": raise ValueError("output_data_path is empty")
-        self.output_data_path = kwargs['output_data_path']
+        self.drop_all_duplicates = kwargs['drop_all_duplicates']
+        self.drop_duplicates_class_list = kwargs['drop_duplicates_class_list']
         self.min_words_count = kwargs['min_words_count']
         self.max_words_count = kwargs['max_words_count']
         self.min_word_len = kwargs['min_word_len']
@@ -67,9 +69,6 @@ class CleanerSetting(BaseSetting):
 class TrainerSetting(BaseSetting):
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
-        if kwargs['input_data_path'] == "":
-            raise ValueError("input_data_path is empty")
-        self.input_data_path = kwargs['input_data_path']
         self.use_data_balancing = kwargs['use_data_balancing']
         self.data_balancing_setting = DataBalancingSetting(**kwargs['data_balancing_setting'])
 
