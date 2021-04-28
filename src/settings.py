@@ -1,6 +1,7 @@
 import enum
 import json
 import logging
+from typing import Union
 
 log = logging.getLogger("settings")
 
@@ -11,10 +12,10 @@ class SettingType(enum.Enum):
 
 
 class DataBalancingSetting:
-    def __init__(self, min_class_data, under_sampling_value, over_sampling_value) -> None:
+    def __init__(self, min_class_data, over_sampling_value, over_sampling_ratio) -> None:
         self.min_class_data = min_class_data
-        self.under_sampling_value = under_sampling_value
         self.over_sampling_value = over_sampling_value
+        self.over_sampling_ratio = over_sampling_ratio
 
 
 class WordLemmatizationSetting:
@@ -73,7 +74,7 @@ class TrainerSetting(BaseSetting):
         self.data_balancing_setting = DataBalancingSetting(**kwargs['data_balancing_setting'])
 
 
-def get_setting(path: str, setting_type: SettingType):
+def get_setting(path: str, setting_type: SettingType) -> Union[CleanerSetting, TrainerSetting]:
     """Get settings object deserialized from JSON
 
     :param path: path to settings file
@@ -86,7 +87,6 @@ def get_setting(path: str, setting_type: SettingType):
     with open(path, "r", encoding="utf-8") as file:
         if setting_type == SettingType.cleaner:
             settings = CleanerSetting(**json.load(file))
-            # settings.validate()
             return settings
         elif setting_type == SettingType.trainer:
             settings = TrainerSetting(**json.load(file))

@@ -1,11 +1,14 @@
 {
   "name": "cleaner_setting_name",
-  "data_path": "\\example\\path",
+  "input_data_path": "\\example\\path",
+  "output_data_path": "\\example\\path",
   "log_path": "\\logs",
   "use_data_balancing": true,
   "data_balancing_setting": {
     "min_class_data": 100,
-    "under_sampling_value": 0,
-    "over_sampling_value": 0
+    "over_sampling_value": 0,
+    "over_sampling_ratio": {
+      "class_id": "value"
+    }
   }
 }
