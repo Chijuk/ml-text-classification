@@ -1,5 +1,4 @@
 import logging
-import os
 import sys
 
 import pandas as pd
@@ -9,14 +8,15 @@ from tqdm.auto import tqdm
 import logger_utils
 import stop_words_utils
 import text_utils
-from settings import CleanerSetting, get_setting, SettingType, BaseSetting
+from file_utils import read_data, save_data
+from settings import CleanerSetting, get_setting, SettingType
 
 log = logging.getLogger("preprocess")
 
 
 @logger_utils.profile
 def data_preprocess(setting: CleanerSetting, stop_words: KeywordProcessor) -> None:
-    data = __read_data(setting)
+    data = read_data(setting)
 
     if setting.drop_all_duplicates or len(setting.drop_duplicates_class_list) > 0:
         data = process_duplicates(data, "class_id", drop_all=setting.drop_all_duplicates,
@@ -29,7 +29,7 @@ def data_preprocess(setting: CleanerSetting, stop_words: KeywordProcessor) -> No
     data.reset_index(drop=True)
 
     log.info(f'Cleaning finished. Data shape: {data.shape}')
-    __save_data(data, os.getcwd() + setting.output_data_path)
+    save_data(data, setting.output_data_path)
 
 
 def process_duplicates(data: pd.DataFrame, group_column: str, drop_all: True, class_list: []) -> pd.DataFrame:
@@ -49,27 +49,11 @@ def process_duplicates(data: pd.DataFrame, group_column: str, drop_all: True, cl
     return data
 
 
-def __read_data(setting: BaseSetting) -> pd.DataFrame:
-    input_data_path = os.getcwd() + setting.input_data_path
-    log.debug(f'Reading data from: {input_data_path}')
-    data = pd.read_csv(input_data_path, header=0, delimiter=";", encoding='utf-8')
-    log.info("Data shape: {}".format(data.shape))
-    return data
-
-
-def __save_data(data: pd.DataFrame, path: str) -> None:
-    head, tail = os.path.split(path)
-    os.makedirs(head, exist_ok=True)
-    log.info("Saving to csv...")
-    data.to_csv(path, sep=';', encoding='utf-8', index=False)
-    log.info(f'Saved to: {path}')
-
-
 if __name__ == "__main__":
     if len(sys.argv) == 1:
         print("Please provide cleaner settings path. Exit...")
     elif len(sys.argv) == 2:
-        cleaner_settings: CleanerSetting = get_setting(str(sys.argv[1]), SettingType.cleaner)
+        cleaner_settings = get_setting(str(sys.argv[1]), SettingType.cleaner)
         logger_utils.init_logging(cleaner_settings.log_path + "\\" + cleaner_settings.name)
         log.info("==> Start initialization")
         stop_words_processor = stop_words_utils.load_processor(cleaner_settings)
