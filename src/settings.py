@@ -25,8 +25,9 @@ class WordLemmatizationSetting:
 
 
 class EmailSetting:
-    def __init__(self, signatures) -> None:
+    def __init__(self, signatures, clean_address) -> None:
         self.signatures = signatures.split(";")
+        self.clean_address = clean_address
 
 
 class StopWordsSettings:
@@ -63,6 +64,7 @@ class CleanerSetting(BaseSetting):
         self.clean_email = kwargs['clean_email']
         self.email_setting = EmailSetting(**kwargs['email_setting'])
         self.clean_html = kwargs['clean_html']
+        self.clean_urls = kwargs['clean_urls']
         self.use_words_lemmatization = kwargs['use_words_lemmatization']
         self.words_lemmatization_setting = WordLemmatizationSetting(**kwargs['words_lemmatization_setting'])
 
