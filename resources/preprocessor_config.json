@@ -21,8 +21,10 @@
     "use_file_cleanup": []
   },
   "clean_email": true,
+  "clean_urls": true,
   "email_setting": {
-    "signatures": "З повагою, С уважением, з найкращими, from, з повагю, повагою, _______________"
+    "signatures": "З повагою, С уважением, з найкращими, from, з повагю, повагою, _______________",
+    "clean_address": true
   },
   "clean_html": true,
   "use_words_lemmatization": true,

@@ -1,16 +1,15 @@
-import base64
 import logging
 import re
 
-import bs4 as bs4
+import bs4
 from flashtext import KeywordProcessor
 from keras.preprocessing.text import text_to_word_sequence
 
 import language_detector as lang
-from settings import CleanerSetting, EmailSetting, WordLemmatizationSetting
+from settings import CleanerSetting, WordLemmatizationSetting
 
 log = logging.getLogger("text_utils")
-TOKEN_FILTER = '!"#$%&()*+,-./:;<=>?@[\\]^_`{|}~\t\n'
+TOKEN_FILTER = '!"#$%&()*+,-./:;<=>?@[\\]^_`{|}~\t\n' + '’«»'
 
 
 def lemmatize(word: str, settings: WordLemmatizationSetting):
@@ -29,47 +28,24 @@ def lemmatize(word: str, settings: WordLemmatizationSetting):
 
 
 def clean_html(text: str) -> str:
-    result = ""
-    try:
-        if text[:2] == "PG":  # Если BASE64поле
-            soup = bs4.BeautifulSoup(base64.b64decode(text), "html.parser")
-            for cd in soup.findAll(text=True):
-                # Берем первый CDATA, т.к. именно в нем HTML текст
-                if isinstance(cd, bs4.CData) and len(cd) > 3:
-                    cd_string = cd.string
-                    result = base64.b64decode(cd_string).decode('utf-16')
-                    break
-            # Убираем комментарии
-            soup = bs4.BeautifulSoup(result, "html.parser")
-            for cd in soup.findAll(text=True):
-                if isinstance(cd, bs4.Comment):
-                    cd.extract()
-            for cd in soup.findAll('style'):
-                cd.extract()
-            for cd in soup.findAll('script'):
-                cd.extract()
-            for cd in soup.findAll('head'):
-                cd.extract()
-            for cd in soup.findAll('link'):
-                cd.extract()
-            # Убираем HTML разметку
-            result = soup.get_text()
-            soup = bs4.BeautifulSoup(result, "html.parser")
-            return soup.get_text()
-        else:
-            return text
-    except Exception as e:
-        log.error("Can't clean text. Error: " + str(e), exc_info=True)
+    return bs4.BeautifulSoup(text, "html.parser").get_text(separator=' ')
 
 
-def clean_email(text: str, settings: EmailSetting) -> str:
+def clean_urls(text: str) -> str:
+    return re.sub(r'(http|www)\S+', ' ', str(text))
+
+
+def clean_email_address(text: str) -> str:
+    return re.sub(r'[a-z0-9.\-+_]+@[a-z0-9.\-+_]+\.[a-z]+', ' ', str(text))
+
+
+def clean_email_signature(text: str, signatures: list) -> str:
     """
 
     :param text: text
-    :param settings: email settings object
+    :param signatures: list of email signatures
     :return: cleaned text
     """
-    signatures = settings.signatures
     if signatures[-1].lstrip().rstrip() == "":
         signatures.pop()
     for signature in signatures:
@@ -88,9 +64,13 @@ def clean_text(text: str, settings: CleanerSetting, stop_words: KeywordProcessor
     :return: cleaned text
     """
     if settings.clean_email:
-        text = clean_email(text, settings.email_setting)
+        text = clean_email_signature(text, settings.email_setting.signatures)
     if settings.clean_html:
         text = clean_html(text)
+    if settings.email_setting.clean_address:
+        text = clean_email_address(text)
+    if settings.clean_urls:
+        text = clean_urls(text)
     # Очищення пробілів та перенесення стрічок
     text = re.sub(r'^\s+|\n|\r|\s+$', ' ', str(text))
     # Очищення цифр
@@ -104,7 +84,7 @@ def clean_text(text: str, settings: CleanerSetting, stop_words: KeywordProcessor
         text = stop_words.replace_keywords(text.lower()).replace("_EMPTY_", "").strip()
 
     # Токенізація
-    tokens = text_to_word_sequence(text, filters=TOKEN_FILTER + '’«»')
+    tokens = text_to_word_sequence(text, filters=TOKEN_FILTER)
     # Видалення слів < мінімальної кількості символів
     if settings.min_word_len > 0:
         tokens = [i for i in tokens if (len(i) >= int(settings.min_word_len))]
