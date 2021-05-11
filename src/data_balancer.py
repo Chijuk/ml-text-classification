@@ -5,24 +5,8 @@ import pandas as pd
 from imblearn.over_sampling import RandomOverSampler
 
 import logger_utils
-from settings import DataBalancingSetting
 
 log = logging.getLogger("data_balancer")
-
-
-def execute(data: pd.DataFrame, setting: DataBalancingSetting) -> pd.DataFrame:
-    log.info("Start balancing data")
-    if setting.min_class_data > 0:
-        data = trim_minor_classes(data, setting.min_class_data)
-    if setting.over_sampling_value > 0:
-        data = over_sample_data(data, data["class_id"], get_sample_ratio(data["class_id"], setting.over_sampling_value,
-                                                                         "oversample"))
-    elif len(setting.over_sampling_ratio) > 0:
-        data = over_sample_data(data, data["class_id"], setting.over_sampling_ratio)
-
-    log.info("Finished balancing data")
-
-    return data
 
 
 @logger_utils.profile
@@ -47,11 +31,13 @@ def trim_minor_classes(data: pd.DataFrame, min_class_data: int) -> pd.DataFrame:
 
 
 def over_sample_data(x: pd.DataFrame, y: pd.DataFrame, sample_ratio: dict) -> Tuple[pd.DataFrame, pd.DataFrame]:
-    # cast str key to int
+    log.info(f'Dataset size before oversampling: {x.shape[0]}')
     ratio = {}
     for key, value in sample_ratio.items():
         ratio[int(key)] = value
-    return RandomOverSampler(sampling_strategy=ratio).fit_resample(x, y)
+    x_ros, y_ros = RandomOverSampler(sampling_strategy=ratio).fit_resample(x, y)
+    log.info(f'Dataset size after oversampling: {x_ros.shape[0]}')
+    return x_ros, y_ros
 
 
 def get_sample_ratio(y: pd.DataFrame, sample_value: int, strategy: str) -> Dict[int, int]:

@@ -1,5 +1,5 @@
 {
-  "name": "cleaner_setting_name",
+  "name": "trainer_setting_name",
   "input_data_path": "\\example\\path",
   "output_data_path": "\\example\\path",
   "log_path": "\\logs",
@@ -10,5 +10,15 @@
     "over_sampling_ratio": {
       "class_id": "value"
     }
-  }
+  },
+  "intermediate_data_path": "\\example\\path",
+  "model_name": "model_name",
+  "train_data_size": 0.9,
+  "validation_data_size": 0.05,
+  "use_class_weight": true,
+  "use_sample_weight": true,
+  "dict_num_words": 0,
+  "max_sequence_length": 30,
+  "epochs": 10,
+  "batch_size": 16
 }

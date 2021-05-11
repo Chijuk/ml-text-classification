@@ -1,3 +1,4 @@
+import json
 import logging
 import sys
 
@@ -8,7 +9,7 @@ from tqdm.auto import tqdm
 import logger_utils
 import stop_words_utils
 import text_utils
-from file_utils import read_data, save_data
+from file_utils import read_dataset, save_dataset
 from settings import CleanerSetting, get_setting, SettingType
 
 log = logging.getLogger("preprocess")
@@ -16,7 +17,7 @@ log = logging.getLogger("preprocess")
 
 @logger_utils.profile
 def data_preprocess(setting: CleanerSetting, stop_words: KeywordProcessor) -> None:
-    data = read_data(setting)
+    data = read_dataset(setting.input_data_path)
 
     if setting.drop_all_duplicates or len(setting.drop_duplicates_class_list) > 0:
         data = process_duplicates(data, "class_id", drop_all=setting.drop_all_duplicates,
@@ -29,7 +30,7 @@ def data_preprocess(setting: CleanerSetting, stop_words: KeywordProcessor) -> No
     data.reset_index(drop=True)
 
     log.info(f'Cleaning finished. Data shape: {data.shape}')
-    save_data(data, setting.output_data_path)
+    save_dataset(data, setting.output_data_path)
 
 
 def process_duplicates(data: pd.DataFrame, group_column: str, drop_all: True, class_list: []) -> pd.DataFrame:
@@ -53,8 +54,9 @@ if __name__ == "__main__":
     if len(sys.argv) == 1:
         print("Please provide cleaner settings path. Exit...")
     elif len(sys.argv) == 2:
-        cleaner_settings = get_setting(str(sys.argv[1]), SettingType.cleaner)
+        cleaner_settings: CleanerSetting = get_setting(str(sys.argv[1]), SettingType.cleaner)
         logger_utils.init_logging(cleaner_settings.log_path + "\\" + cleaner_settings.name)
+        log.info(f'Using settings:\n{json.dumps(cleaner_settings.__dict__, default=lambda x: x.__dict__)}')
         log.info("==> Start initialization")
         stop_words_processor = stop_words_utils.load_processor(cleaner_settings)
         log.info("Total stop words: {}".format(len(stop_words_processor)))
