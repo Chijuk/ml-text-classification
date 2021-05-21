@@ -1,0 +1,9 @@
+{
+  "name": "debug_service",
+  "log_path": "D:\\DEV\\Python projects\\machine-learning\\experiments\\oschad_pilot\\service\\logs",
+  "model_path": "D:\\DEV\\Python projects\\machine-learning\\experiments\\oschad_pilot\\data\\trained\\oschadbank_pilot.h5",
+  "dict_path": "D:\\DEV\\Python projects\\machine-learning\\experiments\\oschad_pilot\\data\\trained\\dict.bin",
+  "classes_path": "D:\\DEV\\Python projects\\machine-learning\\experiments\\oschad_pilot\\data\\trained\\classes.csv",
+  "preprocessor_settings_path": "D:\\DEV\\Python projects\\machine-learning\\experiments\\oschad_pilot\\preprocessor_config.json",
+  "top_n_predictions": 5
+}

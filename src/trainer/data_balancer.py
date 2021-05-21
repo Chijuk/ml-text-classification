@@ -4,7 +4,7 @@ from typing import Tuple, Dict
 import pandas as pd
 from imblearn.over_sampling import RandomOverSampler
 
-import logger_utils
+from utils import logger_utils
 
 log = logging.getLogger("data_balancer")
 

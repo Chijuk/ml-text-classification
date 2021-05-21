@@ -5,7 +5,7 @@ import fasttext
 import pymorphy2
 
 current_file_path = WindowsPath(os.path.dirname(os.path.abspath(__file__)))
-PRETRAINED_LANG_MODEL = str(current_file_path.parent) + "\\resources\\bin\\lid.176.bin"
+PRETRAINED_LANG_MODEL = str(current_file_path.parent.parent) + "\\resources\\bin\\lid.176.bin"
 morph_ru = pymorphy2.MorphAnalyzer(lang="ru")
 morph_uk = pymorphy2.MorphAnalyzer(lang="uk")
 

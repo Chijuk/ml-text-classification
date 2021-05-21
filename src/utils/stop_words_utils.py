@@ -7,7 +7,8 @@ import pandas as pd
 from flashtext import KeywordProcessor
 
 import settings
-import text_utils
+import utils.text_utils as text_utils
+from utils.file_utils import process_path
 
 log = logging.getLogger("stop_words")
 STOP_WORDS_UK = "ukrainian_dict.txt"
@@ -40,7 +41,7 @@ def load_default(ru: False, uk: False) -> pd.DataFrame:
     """
     log.info("Loading default stop words...")
     file_path = WindowsPath(os.path.dirname(os.path.abspath(__file__)))
-    file_path = str(file_path.parent) + "\\resources\\stop_words\\"
+    file_path = str(file_path.parent.parent) + "\\resources\\stop_words\\"
     if not os.path.exists(file_path):
         raise FileNotFoundError("Folder {} does not exist".format(file_path))
     stop_words = pd.DataFrame()
@@ -55,7 +56,7 @@ def load_default(ru: False, uk: False) -> pd.DataFrame:
     return stop_words
 
 
-def load_custom(setting: settings.CleanerSetting) -> pd.DataFrame:
+def load_custom(setting: settings.PreprocessorSetting) -> pd.DataFrame:
     """
     Load custom list of stop words from all files in the path.
     Stop words must be prepared for flashtext (must contain '=>' delimiter for cleaning).
@@ -65,12 +66,12 @@ def load_custom(setting: settings.CleanerSetting) -> pd.DataFrame:
     :return: summing DataFrame with stop words. May be empty
     """
     log.info("Loading custom stop words...")
-    full_path = os.getcwd() + setting.stop_words_settings.custom_stop_words_path
-    log.debug(f'Searching custom stop words on path: {full_path}')
+    files_path = process_path(setting.stop_words_settings.custom_stop_words_path)
+    log.info(f'Searching custom stop words on path: {files_path}')
 
     stop_words = pd.DataFrame()
 
-    files = [f for f in os.listdir(full_path) if os.path.isfile(os.path.join(full_path, f))]
+    files = [f for f in os.listdir(files_path) if os.path.isfile(os.path.join(files_path, f))]
     if len(files) > 0:
         if len(setting.stop_words_settings.use_file_cleanup) > 0:
             # Modify settings copy
@@ -80,21 +81,22 @@ def load_custom(setting: settings.CleanerSetting) -> pd.DataFrame:
             new_setting.clean_email = False
             new_setting.min_words_count = 0
         for f in files:
-            words = load(full_path + "\\" + f)
+            words = load(files_path + "\\" + f)
             if not words.empty:
                 words[['keywords', 'clean_name']] = words['keywords'].str.split("=>", expand=True)
             if f in setting.stop_words_settings.use_file_cleanup:
-                # General char cleaning in stop words
-                words['keywords'] = words['keywords'].apply(text_utils.clean_text, args=(new_setting, None))
+                # General words cleaning in stop words
+                words['keywords'] = words['keywords'].apply(text_utils.clean_text_with_setting,
+                                                            args=(new_setting, None))
                 words = words[words['keywords'] != ""]
             stop_words = pd.concat([words, stop_words], ignore_index=True)
     else:
-        log.info("No custom stop words in {}".format(full_path))
+        log.info("No custom stop words in {}".format(files_path))
 
     return stop_words
 
 
-def load_processor(setting: settings.CleanerSetting) -> KeywordProcessor:
+def load_processor(setting: settings.PreprocessorSetting) -> KeywordProcessor:
     """
     Return KeywordProcessor object with different words loaded.
     Words are sorted by len descending and without duplicates

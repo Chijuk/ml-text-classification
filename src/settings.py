@@ -9,6 +9,7 @@ log = logging.getLogger("settings")
 class SettingType(enum.Enum):
     cleaner = "cleaner"
     trainer = "trainer"
+    service = "service"
 
 
 class DataBalancingSetting:
@@ -26,7 +27,10 @@ class WordLemmatizationSetting:
 
 class EmailSetting:
     def __init__(self, signatures, clean_address) -> None:
-        self.signatures = signatures.split(";")
+        if signatures != "":
+            self.signatures = signatures.split(";")
+        else:
+            self.signatures = ""
         self.clean_address = clean_address
 
 
@@ -56,13 +60,12 @@ class BaseSetting:
                f'log_path: {self.log_path}\n'
 
 
-class CleanerSetting(BaseSetting):
+class PreprocessorSetting(BaseSetting):
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
         self.drop_all_duplicates = kwargs['drop_all_duplicates']
         self.drop_duplicates_class_list = kwargs['drop_duplicates_class_list']
         self.min_words_count = kwargs['min_words_count']
-        self.max_words_count = kwargs['max_words_count']
         self.min_word_len = kwargs['min_word_len']
         self.max_word_len = kwargs['max_word_len']
         self.clean_stop_words = kwargs['clean_stop_words']
@@ -92,7 +95,18 @@ class TrainerSetting(BaseSetting):
         self.batch_size = kwargs['batch_size']
 
 
-def get_setting(path: str, setting_type: SettingType) -> Union[CleanerSetting, TrainerSetting]:
+class ServiceSetting:
+    def __init__(self, **kwargs) -> None:
+        self.name = kwargs['name']
+        self.log_path = kwargs['log_path']
+        self.model_path = kwargs['model_path']
+        self.dict_path = kwargs['dict_path']
+        self.classes_path = kwargs['classes_path']
+        self.preprocessor_settings_path = kwargs['preprocessor_settings_path']
+        self.top_n_predictions = kwargs['top_n_predictions']
+
+
+def get_setting(path: str, setting_type: SettingType) -> Union[PreprocessorSetting, TrainerSetting, ServiceSetting]:
     """Get settings object deserialized from JSON
 
     :param path: path to settings file
@@ -104,10 +118,13 @@ def get_setting(path: str, setting_type: SettingType) -> Union[CleanerSetting, T
         raise FileNotFoundError("Path %s does not exist!" % path)
     with open(path, "r", encoding="utf-8") as file:
         if setting_type == SettingType.cleaner:
-            settings = CleanerSetting(**json.load(file))
+            settings = PreprocessorSetting(**json.load(file))
             return settings
         elif setting_type == SettingType.trainer:
             settings = TrainerSetting(**json.load(file))
+            return settings
+        elif setting_type == SettingType.service:
+            settings = ServiceSetting(**json.load(file))
             return settings
         else:
             raise TypeError("Unknown setting type %s" % setting_type)
