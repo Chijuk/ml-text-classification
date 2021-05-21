@@ -6,17 +6,15 @@ import pandas as pd
 from flashtext import KeywordProcessor
 from tqdm.auto import tqdm
 
-import logger_utils
-import stop_words_utils
-import text_utils
-from file_utils import read_dataset, save_dataset
-from settings import CleanerSetting, get_setting, SettingType
+from settings import PreprocessorSetting, get_setting, SettingType
+from utils import logger_utils, text_utils, stop_words_utils
+from utils.file_utils import read_dataset, save_dataset
 
 log = logging.getLogger("preprocess")
 
 
 @logger_utils.profile
-def data_preprocess(setting: CleanerSetting, stop_words: KeywordProcessor) -> None:
+def data_preprocess(setting: PreprocessorSetting, stop_words: KeywordProcessor) -> None:
     data = read_dataset(setting.input_data_path)
 
     if setting.drop_all_duplicates or len(setting.drop_duplicates_class_list) > 0:
@@ -24,7 +22,7 @@ def data_preprocess(setting: CleanerSetting, stop_words: KeywordProcessor) -> No
                                   class_list=setting.drop_duplicates_class_list)
     log.info("Start text cleaning")
     tqdm.pandas(desc="cleaning text", ncols=100, mininterval=1, unit="row", colour="green")
-    data["text"] = data["text"].progress_apply(text_utils.clean_text, args=(setting, stop_words))
+    data["text"] = data["text"].progress_apply(text_utils.clean_text_with_setting, args=(setting, stop_words))
     log.info(f'Drop {data[data["text"] == ""].shape[0]} row(s) after text cleaning')
     data = data[data['text'] != ""]
     data.reset_index(drop=True)
@@ -54,13 +52,13 @@ if __name__ == "__main__":
     if len(sys.argv) == 1:
         print("Please provide cleaner settings path. Exit...")
     elif len(sys.argv) == 2:
-        cleaner_settings: CleanerSetting = get_setting(str(sys.argv[1]), SettingType.cleaner)
-        logger_utils.init_logging(cleaner_settings.log_path + "\\" + cleaner_settings.name)
-        log.info(f'Using settings:\n{json.dumps(cleaner_settings.__dict__, default=lambda x: x.__dict__)}')
+        preprocessor_settings: PreprocessorSetting = get_setting(str(sys.argv[1]), SettingType.cleaner)
+        logger_utils.init_logging(preprocessor_settings.log_path + "\\" + preprocessor_settings.name)
+        log.info(f'Using settings:\n{json.dumps(preprocessor_settings.__dict__, default=lambda x: x.__dict__)}')
         log.info("==> Start initialization")
-        stop_words_processor = stop_words_utils.load_processor(cleaner_settings)
+        stop_words_processor = stop_words_utils.load_processor(preprocessor_settings)
         log.info("Total stop words: {}".format(len(stop_words_processor)))
         log.info("==> Preprocessor initialized")
-        data_preprocess(cleaner_settings, stop_words_processor)
+        data_preprocess(preprocessor_settings, stop_words_processor)
     else:
         print("Unknown number of arguments! Exit...")

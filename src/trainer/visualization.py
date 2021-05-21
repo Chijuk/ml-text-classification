@@ -4,6 +4,8 @@ import os
 import matplotlib
 import matplotlib.pyplot as plt
 
+from utils.file_utils import process_path
+
 matplotlib.use('agg')  # because of problems with tkinter
 
 log = logging.getLogger("visualization")
@@ -56,6 +58,7 @@ def build_graphs(history, file_path: str) -> None:
     plt.subplot(2, 2, 4)
     plot_graphs(history, 'recall')
     plt.ylim(None, 1)
-    plt.savefig(os.getcwd() + file_path + '\\graphs')
-    build_f1(history, os.getcwd() + file_path + '\\f1')
+    file_path = process_path(file_path, make_dirs=True)
+    plt.savefig(os.path.join(file_path, 'graphs.png'))
+    build_f1(history, os.path.join(file_path, 'f1.png'))
     log.info("Graphs saved!")
