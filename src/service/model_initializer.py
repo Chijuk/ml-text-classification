@@ -9,8 +9,9 @@ from tensorflow.keras.preprocessing.text import Tokenizer
 
 from settings import ServiceSetting, PreprocessorSetting
 from trainer.train import prep_bag_of_words
-from utils import stop_words_utils
+from utils import text_utils
 from utils.file_utils import deserialize_dict, read_dataset, process_path
+from utils.stop_words_utils import StopWordsCleaner
 from utils.text_utils import clean_text_with_setting
 
 log = logging.getLogger("model_initializer")
@@ -74,7 +75,21 @@ def load_classes(file_path: str) -> pd.DataFrame:
 
 
 def load_stop_words(preprocessor_setting: PreprocessorSetting) -> KeywordProcessor:
-    stop_words_processor = stop_words_utils.load_processor(preprocessor_setting)
+    stop_words_setting = preprocessor_setting.stop_words_settings
+    if preprocessor_setting.use_words_lemmatization:
+        lemmatize_russian = preprocessor_setting.words_lemmatization_setting.russian
+        lemmatize_ukrainian = preprocessor_setting.words_lemmatization_setting.ukrainian
+    else:
+        lemmatize_russian = False
+        lemmatize_ukrainian = False
+    cleaner = StopWordsCleaner(load_uk=stop_words_setting.use_uk_stop_words,
+                               load_ru=stop_words_setting.use_ru_stop_words,
+                               custom_path=stop_words_setting.custom_stop_words_path,
+                               use_file_cleanup=stop_words_setting.use_file_cleanup,
+                               cleanup_function=text_utils.clean_text,
+                               lemmatize_russian=lemmatize_russian,
+                               lemmatize_ukrainian=lemmatize_ukrainian)
+    stop_words_processor = cleaner.fit_text()
     log.info("Total stop words: {}".format(len(stop_words_processor)))
     return stop_words_processor
 

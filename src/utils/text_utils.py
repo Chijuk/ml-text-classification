@@ -6,17 +6,17 @@ from flashtext import KeywordProcessor
 from tensorflow.keras.preprocessing.text import text_to_word_sequence
 
 from preprocessor import language_detector as lang
-from settings import PreprocessorSetting, WordLemmatizationSetting
+from settings import PreprocessorSetting
 
 log = logging.getLogger("text_utils")
 TOKEN_FILTER = '!"#$%&()*+,-./:;<=>?@[\\]^_`{|}~\t\n' + '’«»'
 
 
-def lemmatize(word: str, settings: WordLemmatizationSetting):
+def lemmatize(word: str, russian=False, ukrainian=False):
     language = lang.detect_language(word)
-    if language == "ru" and settings.russian:
+    if language == "ru" and russian:
         p = lang.morph_ru.parse(word)[0]
-    elif language == "uk" and settings.ukrainian:
+    elif language == "uk" and ukrainian:
         p = lang.morph_uk.parse(word)[0]
     else:
         return word
@@ -40,12 +40,6 @@ def clean_email_addresses(text: str) -> str:
 
 
 def clean_email_signature(text: str, signatures: list) -> str:
-    """
-
-    :param text: text
-    :param signatures: list of email signatures
-    :return: cleaned text
-    """
     if signatures[-1].lstrip().rstrip() == "":
         signatures.pop()
     for signature in signatures:
@@ -54,17 +48,30 @@ def clean_email_signature(text: str, signatures: list) -> str:
     return text
 
 
+def clean_formatting(text: str) -> str:
+    return re.sub(r'^\s+|\n|\r|\s+$', ' ', str(text))
+
+
+def clean_all_numbers(text: str) -> str:
+    return re.sub(r'[0-9]+', '', str(text))
+
+
+def clean_stop_words(text: str, stop_words: KeywordProcessor) -> str:
+    return stop_words.replace_keywords(text.lower()).replace("_EMPTY_", "").strip()
+
+
 def clean_text_with_setting(text: str, setting: PreprocessorSetting, stop_words: KeywordProcessor) -> str:
     return clean_text(text=text, email_signatures=setting.email_setting.signatures,
                       clean_html=setting.clean_html, clean_email_address=setting.email_setting.clean_address,
                       clean_urls=setting.clean_urls, stop_words=stop_words, min_word_len=setting.min_word_len,
-                      max_word_len=setting.max_word_len, lemmatization_setting=setting.words_lemmatization_setting,
+                      max_word_len=setting.max_word_len, lemmatize_russian=setting.words_lemmatization_setting.russian,
+                      lemmatize_ukrainian=setting.words_lemmatization_setting.ukrainian,
                       min_words_count=setting.min_words_count)
 
 
 def clean_text(text: str, email_signatures="", clean_html=False, clean_email_address=False, clean_urls=False,
                clean_numbers=True, stop_words=None, min_word_len=0, max_word_len=0,
-               lemmatization_setting: WordLemmatizationSetting = None,
+               lemmatize_russian=False, lemmatize_ukrainian=False,
                min_words_count=0) -> str:
     """
     Execute all cleaner functions
@@ -80,16 +87,16 @@ def clean_text(text: str, email_signatures="", clean_html=False, clean_email_add
     if clean_urls:
         text = clean_url(text)
     # Очищення пробілів та перенесення стрічок
-    text = re.sub(r'^\s+|\n|\r|\s+$', ' ', str(text))
+    text = clean_formatting(text)
     if clean_numbers:
-        text = re.sub(r'[0-9]+', '', str(text))
+        text = clean_all_numbers(text)
 
     # Проблемні знаки для токенізатора
     # text = text.replace("’", "'").replace('"', "").replace("«", "").replace("»", "").replace("''", "")
 
     # Очищення стоп слів зі списку stop_words
     if stop_words is not None and len(stop_words) > 0:
-        text = stop_words.replace_keywords(text.lower()).replace("_EMPTY_", "").strip()
+        text = clean_stop_words(text, stop_words)
 
     # Токенізація
     tokens = text_to_word_sequence(text, filters=TOKEN_FILTER)
@@ -100,8 +107,8 @@ def clean_text(text: str, email_signatures="", clean_html=False, clean_email_add
     if max_word_len > 0:
         tokens = [i for i in tokens if (len(i) <= int(max_word_len))]
     # Лексикологічна нормалізація слів
-    if lemmatization_setting is not None:
-        tokens = [lemmatize(i, lemmatization_setting) for i in tokens]
+    if lemmatize_russian or lemmatize_ukrainian:
+        tokens = [lemmatize(i, lemmatize_russian, lemmatize_ukrainian) for i in tokens]
 
     # Очистити по мінімальній кількості слів
     if len(tokens) < int(min_words_count):

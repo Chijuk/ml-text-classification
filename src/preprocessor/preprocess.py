@@ -7,8 +7,9 @@ from flashtext import KeywordProcessor
 from tqdm.auto import tqdm
 
 from settings import PreprocessorSetting, get_setting, SettingType
-from utils import logger_utils, text_utils, stop_words_utils
+from utils import logger_utils, text_utils
 from utils.file_utils import read_dataset, save_dataset
+from utils.stop_words_utils import StopWordsCleaner
 
 log = logging.getLogger("preprocess")
 
@@ -56,7 +57,14 @@ if __name__ == "__main__":
         logger_utils.init_logging(preprocessor_settings.log_path + "\\" + preprocessor_settings.name)
         log.info(f'Using settings:\n{json.dumps(preprocessor_settings.__dict__, default=lambda x: x.__dict__)}')
         log.info("==> Start initialization")
-        stop_words_processor = stop_words_utils.load_processor(preprocessor_settings)
+        stop_words_setting = preprocessor_settings.stop_words_settings
+        cleaner = StopWordsCleaner(load_uk=stop_words_setting.use_uk_stop_words,
+                                   load_ru=stop_words_setting.use_ru_stop_words,
+                                   custom_path=stop_words_setting.custom_stop_words_path,
+                                   use_file_cleanup=stop_words_setting.use_file_cleanup,
+                                   cleanup_function=text_utils.clean_text,
+                                   lemmatize_russian=True, lemmatize_ukrainian=True)
+        stop_words_processor = cleaner.fit_text()
         log.info("Total stop words: {}".format(len(stop_words_processor)))
         log.info("==> Preprocessor initialized")
         data_preprocess(preprocessor_settings, stop_words_processor)
