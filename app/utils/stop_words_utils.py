@@ -100,7 +100,6 @@ class StopWordsCleaner:
             self._load_custom()
         if not self.stop_words.empty:
             self.stop_words.drop_duplicates(subset=['keywords'], inplace=True)
-            log.debug(f'after drop duplicates stop words {len(self.stop_words)}')
             self.stop_words.reset_index(inplace=True, drop=True)
             # Sort by 'keywords' length
             self.stop_words = self.stop_words.reindex((-self.stop_words['keywords'].str.len()).argsort()).reset_index(
