@@ -46,6 +46,12 @@ def get_class_weights(y: np.ndarray) -> list:
     return class_weight.compute_class_weight(class_weight='balanced', classes=np.unique(y), y=y)
 
 
+def get_sample_weight(y: np.ndarray) -> np.ndarray:
+    class_weights_dict = get_class_weights(y)
+    class_weights_dict = dict(zip(np.unique(y), class_weights_dict))  # as {class label, class}
+    return class_weight.compute_sample_weight(class_weight=class_weights_dict, y=y)
+
+
 def save_classes(data: pd.DataFrame, weights: dict, path: str) -> None:
     classes = pd.DataFrame()
     classes['class_id'] = data['class_id']
@@ -96,14 +102,12 @@ def execute_trainer(setting: TrainerSetting) -> None:
         class_weights = get_class_weights(y_train.values)
         # Використовується dict(enumeration, class_weights) для підтримки масиву [y] з get_dummies()
         # Використовується dict(class_label, class_weights) якщо значення [y] передаються напряму в модель
-        class_weights = dict(enumerate(class_weights))  # as class enumeration
+        class_weights = dict(enumerate(class_weights))  # as {class enumeration, class}
 
     sample_weights = None
     class_weights_dict = None
     if setting.use_sample_weight:
-        class_weights_dict = get_class_weights(y_train.values)
-        class_weights_dict = dict(zip(np.unique(y_train.values), class_weights_dict))  # as class labels
-        sample_weights = class_weight.compute_sample_weight(class_weight=class_weights_dict, y=y_train.values)
+        sample_weights = get_sample_weight(y_train.values)
 
     dictionary = create_dictionary(data['text'].values, setting.dict_num_words)
     serialize_dict(setting.output_data_path, dictionary)
