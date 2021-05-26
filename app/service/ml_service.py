@@ -15,7 +15,7 @@ from utils import logger_utils
 os.environ['TF_XLA_FLAGS'] = '--tf_xla_enable_xla_devices'
 log = logging.getLogger("ml_service")
 
-SERVICE_CONFIG = "service_config.json"
+SERVICE_CONFIG = "ML_SERVICE_SETTINGS"
 service_settings: ServiceSetting = None
 preprocessor_settings: PreprocessorSetting = None
 predictor: ServiceParameterPredictor = None
@@ -93,7 +93,7 @@ def init_service(service_setting: ServiceSetting, preprocessor_setting: Preproce
 
 
 if __name__ == "__main__":
-    service_settings: ServiceSetting = get_setting(SERVICE_CONFIG, SettingType.service)
+    service_settings: ServiceSetting = get_setting(os.getenv(SERVICE_CONFIG), SettingType.service)
     preprocessor_settings: PreprocessorSetting = get_setting(service_settings.preprocessor_settings_path,
                                                              SettingType.cleaner)
     logger_utils.init_logging(service_settings.log_path + "\\" + service_settings.name)
