@@ -27,8 +27,7 @@ class ServiceParameterPredictor:
         self.text_sequence = None
 
     def preprocess_text(self, text: str, preprocessor_settings: PreprocessorSetting) -> str:
-        self.preprocessed_text = clean_text_with_setting(text, preprocessor_settings, self.stop_words)
-        return self.preprocessed_text
+        return clean_text_with_setting(text, preprocessor_settings, self.stop_words)
 
     def _preprocess_prediction(self, prediction: np.ndarray, top_n=5) -> Union[pd.DataFrame, None]:
         if prediction.shape[0] == 0:
@@ -82,6 +81,11 @@ def load_stop_words(preprocessor_setting: PreprocessorSetting) -> KeywordProcess
     else:
         lemmatize_russian = False
         lemmatize_ukrainian = False
+    if preprocessor_setting.clean_stop_words:
+        stop_words_setting.use_uk_stop_words = False
+        stop_words_setting.use_ru_stop_words = False
+        stop_words_setting.custom_stop_words_path = ""
+        stop_words_setting.use_file_cleanup = None
     cleaner = StopWordsCleaner(load_uk=stop_words_setting.use_uk_stop_words,
                                load_ru=stop_words_setting.use_ru_stop_words,
                                custom_path=stop_words_setting.custom_stop_words_path,
