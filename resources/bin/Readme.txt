@@ -1,0 +1,1 @@
+Put fasttext pretrained model here
