@@ -4,6 +4,7 @@ import atexit
 import json
 import logging
 import os
+import sys
 
 import werkzeug.exceptions
 from flask import Flask, request, Response, jsonify
@@ -93,7 +94,13 @@ def init_service(service_setting: ServiceSetting, preprocessor_setting: Preproce
 
 
 if __name__ == "__main__":
-    service_settings: ServiceSetting = get_setting(os.getenv(SERVICE_CONFIG), SettingType.service)
+    if len(sys.argv) == 2:
+        setting_path = str(sys.argv[1])
+    elif os.getenv(SERVICE_CONFIG) != "":
+        setting_path = os.getenv(SERVICE_CONFIG)
+    else:
+        raise ValueError(f'Can not find service setting')
+    service_settings: ServiceSetting = get_setting(setting_path, SettingType.service)
     preprocessor_settings: PreprocessorSetting = get_setting(service_settings.preprocessor_settings_path,
                                                              SettingType.cleaner)
     logger_utils.init_logging(service_settings.log_path + "\\" + service_settings.name)

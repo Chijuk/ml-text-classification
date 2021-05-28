@@ -1,9 +1,9 @@
 {
-  "name": "ml_service",
-  "log_path": "D:\\DEV\\Python projects\\machine-learning\\experiments\\oschad_pilot\\logs",
-  "model_path": "D:\\DEV\\Python projects\\machine-learning\\experiments\\oschad_pilot\\data\\trained\\oschadbank_pilot.h5",
-  "dict_path": "D:\\DEV\\Python projects\\machine-learning\\experiments\\oschad_pilot\\data\\trained\\dict.bin",
-  "classes_path": "D:\\DEV\\Python projects\\machine-learning\\experiments\\oschad_pilot\\data\\trained\\classes.csv",
-  "preprocessor_settings_path": "D:\\DEV\\Python projects\\machine-learning\\experiments\\oschad_pilot\\preprocessor_config.json",
+  "name": "service_name",
+  "log_path": "path\\to\\log",
+  "model_path": "path\\to\\model.h5",
+  "dict_path": "path\\to\\dict.bin",
+  "classes_path": "path\\to\\classes.csv",
+  "preprocessor_settings_path": "path\\to\\preprocessor_config.json",
   "top_n_predictions": 5
 }

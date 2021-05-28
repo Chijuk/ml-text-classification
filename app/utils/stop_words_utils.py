@@ -96,7 +96,7 @@ class StopWordsCleaner:
 
         if self.load_uk or self.load_ru:
             self._load_default()
-        if self.custom_path:
+        if self.custom_path != "":
             self._load_custom()
         if not self.stop_words.empty:
             self.stop_words.drop_duplicates(subset=['keywords'], inplace=True)
