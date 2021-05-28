@@ -9,7 +9,7 @@ import sys
 import werkzeug.exceptions
 from flask import Flask, request, Response, jsonify
 
-from service.model_initializer import init_predictor, ServiceParameterPredictor
+from model_initializer import init_predictor, ServiceParameterPredictor
 from settings import get_setting, SettingType, PreprocessorSetting, ServiceSetting
 from utils import logger_utils
 
@@ -63,9 +63,10 @@ def check_health() -> Response:
 @app.get('/show_model')
 def show_model() -> Response:
     if predictor.model is not None:
-        summary = ''
-        predictor.model.summary(print_fn=lambda x: summary + x + '\n')
-        return Response(response=summary, status=200)
+        summary = []
+        predictor.model.summary(print_fn=log.info)
+        predictor.model.summary(print_fn=lambda x: summary.append(x))
+        return Response(response='\n'.join(summary), status=200, mimetype='text/plain')
     else:
         return Response(response='Model not loaded!', status=200)
 
