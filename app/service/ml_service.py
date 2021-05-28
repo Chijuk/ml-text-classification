@@ -5,9 +5,13 @@ import json
 import logging
 import os
 import sys
+from pathlib import WindowsPath
 
 import werkzeug.exceptions
 from flask import Flask, request, Response, jsonify
+
+# add path to sources for production
+sys.path.append(str(WindowsPath(os.path.dirname(os.path.abspath(__file__))).parent))
 
 from model_initializer import init_predictor, ServiceParameterPredictor
 from settings import get_setting, SettingType, PreprocessorSetting, ServiceSetting
