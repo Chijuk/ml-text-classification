@@ -1,15 +1,17 @@
-### Machine learning repository
 ## Machine learning tools
+[![Generic badge](https://img.shields.io/badge/python-3.8.7-blue.svg)](https://shields.io/)
+[![Generic badge](https://img.shields.io/badge/wfastcgi-3.0.0-blue.svg)](https://shields.io/)
 ### Зміст
 ____
+
 1. [User guide](#User guide)
-    1. [Requirements](#Requirements)
-    2. [Install](#Install)
-    3. [How To](#How To)
-    4. [Settings json](#Settings json)
-3. [Service deployment](#Service deployment)
-    1. [Deployment requirements](#Deployment requirements)
-    2. [Deployment install](#Deployment install)
+   1. [Requirements](#Requirements)
+   2. [Install](#Install)
+   3. [How To](#How-To)
+   4. [Settings json](#Settings-json)
+3. [Service deployment](#Service-deployment)
+   1. [Deployment requirements](#Deployment-requirements)
+   2. [Deployment install](#Deployment-install)
 ### Опис
 ____
 Репозиторій містить набір готових інструментів для навчання deep learning моделі 
