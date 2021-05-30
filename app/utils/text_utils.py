@@ -56,21 +56,27 @@ def clean_all_numbers(text: str) -> str:
     return re.sub(r'[0-9]+', '', str(text))
 
 
-def clean_stop_words(text: str, stop_words: KeywordProcessor) -> str:
+def clean_custom_stop_words(text: str, stop_words: KeywordProcessor) -> str:
     return stop_words.replace_keywords(text.lower()).replace("_EMPTY_", "").strip()
 
 
-def clean_text_with_setting(text: str, setting: PreprocessorSetting, stop_words: KeywordProcessor) -> str:
-    return clean_text(text=text, email_signatures=setting.email_setting.signatures,
+def clean_default_stop_words(text_tokens: list, default_stop_words: set) -> list:
+    return [i for i in text_tokens if (i not in default_stop_words)]
+
+
+def clean_text_with_setting(text: str, setting: PreprocessorSetting, custom_stop_words: KeywordProcessor,
+                            default_stop_words: set) -> str:
+    return clean_text(text, email_signatures=setting.email_setting.signatures,
                       clean_html=setting.clean_html, clean_email_address=setting.email_setting.clean_address,
-                      clean_urls=setting.clean_urls, stop_words=stop_words, min_word_len=setting.min_word_len,
+                      clean_urls=setting.clean_urls, custom_stop_words=custom_stop_words,
+                      default_stop_words=default_stop_words, min_word_len=setting.min_word_len,
                       max_word_len=setting.max_word_len, lemmatize_russian=setting.words_lemmatization_setting.russian,
                       lemmatize_ukrainian=setting.words_lemmatization_setting.ukrainian,
                       min_words_count=setting.min_words_count)
 
 
 def clean_text(text: str, email_signatures="", clean_html=False, clean_email_address=False, clean_urls=False,
-               clean_numbers=True, stop_words=None, min_word_len=0, max_word_len=0,
+               clean_numbers=True, custom_stop_words=None, default_stop_words=None, min_word_len=0, max_word_len=0,
                lemmatize_russian=False, lemmatize_ukrainian=False,
                min_words_count=0) -> str:
     """
@@ -78,6 +84,8 @@ def clean_text(text: str, email_signatures="", clean_html=False, clean_email_add
 
     :return: cleaned text
     """
+    if default_stop_words is None:
+        default_stop_words = set()
     if email_signatures != "":
         text = clean_email_signature(text, list(email_signatures))
     if clean_html:
@@ -95,11 +103,14 @@ def clean_text(text: str, email_signatures="", clean_html=False, clean_email_add
     # text = text.replace("’", "'").replace('"', "").replace("«", "").replace("»", "").replace("''", "")
 
     # Очищення стоп слів зі списку stop_words
-    if stop_words is not None and len(stop_words) > 0:
-        text = clean_stop_words(text, stop_words)
+    if custom_stop_words is not None and len(custom_stop_words) > 0:
+        text = clean_custom_stop_words(text, custom_stop_words)
 
     # Токенізація
     tokens = text_to_word_sequence(text, filters=TOKEN_FILTER)
+    # Видалення стандартних стоп слів
+    if len(default_stop_words) > 0:
+        tokens = clean_default_stop_words(tokens, default_stop_words)
     # Видалення слів < мінімальної кількості символів
     if min_word_len > 0:
         tokens = [i for i in tokens if (len(i) >= int(min_word_len))]

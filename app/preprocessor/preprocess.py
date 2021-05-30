@@ -15,7 +15,7 @@ log = logging.getLogger("preprocess")
 
 
 @logger_utils.profile
-def data_preprocess(setting: PreprocessorSetting, stop_words: KeywordProcessor) -> None:
+def data_preprocess(setting: PreprocessorSetting, custom_stop_words: KeywordProcessor, default_stop_words: set) -> None:
     data = read_dataset(setting.input_data_path)
 
     if setting.drop_all_duplicates or len(setting.drop_duplicates_class_list) > 0:
@@ -23,7 +23,8 @@ def data_preprocess(setting: PreprocessorSetting, stop_words: KeywordProcessor) 
                                   class_list=setting.drop_duplicates_class_list)
     log.info("Start text cleaning")
     tqdm.pandas(desc="cleaning text", ncols=100, mininterval=1, unit="row", colour="green")
-    data["text"] = data["text"].progress_apply(text_utils.clean_text_with_setting, args=(setting, stop_words))
+    data["text"] = data["text"].progress_apply(text_utils.clean_text_with_setting,
+                                               args=(setting, custom_stop_words, default_stop_words))
     log.info(f'Drop {data[data["text"] == ""].shape[0]} row(s) after text cleaning')
     data = data[data['text'] != ""]
     data.reset_index(drop=True)
@@ -60,13 +61,16 @@ if __name__ == "__main__":
         stop_words_setting = preprocessor_settings.stop_words_settings
         cleaner = StopWordsCleaner(load_uk=stop_words_setting.use_uk_stop_words,
                                    load_ru=stop_words_setting.use_ru_stop_words,
+                                   alt_stop_words_file=stop_words_setting.alt_stop_words_file,
                                    custom_path=stop_words_setting.custom_stop_words_path,
                                    use_file_cleanup=stop_words_setting.use_file_cleanup,
                                    cleanup_function=text_utils.clean_text,
                                    lemmatize_russian=True, lemmatize_ukrainian=True)
-        stop_words_processor = cleaner.fit_text()
-        log.info("Total stop words: {}".format(len(stop_words_processor)))
+        if preprocessor_settings.clean_stop_words:
+            cleaner.fit_text()
+            log.info("Total stop words: {}".format(len(cleaner.default_stop_words) + len(cleaner.processor)))
         log.info("==> Preprocessor initialized")
-        data_preprocess(preprocessor_settings, stop_words_processor)
+        data_preprocess(setting=preprocessor_settings, custom_stop_words=cleaner.processor,
+                        default_stop_words=cleaner.default_stop_words)
     else:
         print("Unknown number of arguments! Exit...")

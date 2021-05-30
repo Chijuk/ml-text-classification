@@ -17,6 +17,7 @@
   "stop_words_settings": {
     "use_uk_stop_words": true,
     "use_ru_stop_words": true,
+    "alt_stop_words_file": "\\alt_stop_words\\path",
     "custom_stop_words_path": "\\stop_words\\path",
     "use_file_cleanup": []
   },
