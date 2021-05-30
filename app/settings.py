@@ -35,9 +35,11 @@ class EmailSetting:
 
 
 class StopWordsSettings:
-    def __init__(self, use_uk_stop_words, use_ru_stop_words, custom_stop_words_path, use_file_cleanup) -> None:
+    def __init__(self, use_uk_stop_words, use_ru_stop_words, alt_stop_words_file, custom_stop_words_path,
+                 use_file_cleanup) -> None:
         self.use_uk_stop_words = use_uk_stop_words
         self.use_ru_stop_words = use_ru_stop_words
+        self.alt_stop_words_file = alt_stop_words_file
         self.custom_stop_words_path = custom_stop_words_path
         self.use_file_cleanup = use_file_cleanup
 
