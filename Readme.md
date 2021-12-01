@@ -4,14 +4,14 @@
 ### Зміст
 ____
 
-1. [User guide](#User guide)
+1. [User guide](#User-guide)
    1. [Requirements](#Requirements)
    2. [Install](#Install)
    3. [How To](#How-To)
    4. [Settings json](#Settings-json)
 3. [Service deployment](#Service-deployment)
    1. [Deployment requirements](#Deployment-requirements)
-   2. [Deployment install](#Deployment-install)
+   2. [Deployment install](#Deployment)
 ### Опис
 ____
 Репозиторій містить набір готових інструментів для навчання deep learning моделі 
@@ -128,21 +128,29 @@ ____
 `'drop_duplicates_class_list'`<br/>
 Масив класів. Якщо масив не пустий (`[]`): дублікати будуть видалятись лише у вказаних класах<br/>
 `'min_words_count'`<br/>
-Мінімальна кількість допустимих слів. Якщо кількість менша за вказану — рядок видаляється. Значення: `0` - налаштування ігнорується<br/>
+Мінімальна кількість допустимих слів. Якщо кількість менша за вказану — рядок видаляється. Значення: `0` - налаштування
+ігнорується<br/>
 `'min_word_len'`<br/>
-Мінімальна кількість символів у слові. Якщо кількість менша за вказану — слово видаляється. Значення: `0` - налаштування ігнорується<br/>
+Мінімальна кількість символів у слові. Якщо кількість менша за вказану — слово видаляється. Значення: `0` - налаштування
+ігнорується<br/>
 `'max_word_len'`<br/>
-Максимальна кількість символів у слові. Якщо кількість більша за вказану — слово видаляється. Значення: `0` - налаштування ігнорується<br/>
+Максимальна кількість символів у слові. Якщо кількість більша за вказану — слово видаляється. Значення: `0` -
+налаштування ігнорується<br/>
 `'clean_stop_words'`<br/>
 Використовувати механізм видалення стоп слів. Значення: `true` або `false`<br/>
 `'stop_words_settings'|'use_uk_stop_words'`<br/>
 Використовувати передзаповнений словник українських стоп слів. Значення: `true` або `false`<br/>
 `'stop_words_settings'|'use_ru_stop_words'`<br/>
 Використовувати передзаповнений словник російських стоп слів. Значення: `true` або `false`<br/>
+`'stop_words_settings'|'alt_stop_words_file'`<br/>
+Абсолютний шлях для файлу в форматі `txt`, де знаходяться альтернативні стоп слова (очистка по токенам). Значення: "" -
+налаштування ігнорується<br/>
 `'stop_words_settings'|'custom_stop_words_path'`<br/>
-Абсолютний шлях для папки, де знаходяться файли з користувацькими стоп словами в форматі `txt`. Значення: "" - налаштування ігнорується<br/>
+Абсолютний шлях для папки, де знаходяться файли з користувацькими стоп словами в форматі `txt`. Значення: "" -
+налаштування ігнорується<br/>
 `'stop_words_settings'|'use_file_cleanup'`<br/>
-Масив імен файлів зі стоп словами з розширенням. Якщо масив не пустий (`[]`) - всі стоп слова будуть попередньо очищені по наступному алгоритму:
+Масив імен файлів зі стоп словами з розширенням. Якщо масив не пустий (`[]`) - всі стоп слова будуть попередньо очищені
+по наступному алгоритму:
 - очищення цифри
 - лематизація слів згідно налаштувань
 
@@ -223,9 +231,102 @@ ____
 Число передбачень у відповіді клієнту на виклик POST `/predict`
 
 ### Service deployment
+
 ____
+
 #### Deployment requirements
+
 + Python 3.8.7
-+ IIS (including CGI feature)
-#### Deployment install
-1. 
++ IIS
+
+#### Deployment
+
+Для прикладу `machine-learning` назва папки, де знаходиться актуальний дистрибутив.
+
+1. Скопіювати останню версію дистрибутиву сервісу на сервер в папку `C:\inetpub\wwwroot\machine-learning`
+2. Скачати готову модель для розпізнавання мови
+   за [посиланням](https://omniwayukraine.sharepoint.com/sites/owu/Shared%20Documents/Install/Machine%20learning/fasttext/lid.176.bin)
+   в папку `C:\inetpub\wwwroot\machine-learning\resources\bin`
+3. Скачати бібліотеки для роботи сервісу
+   за [посиланням](https://omniwayukraine.sharepoint.com/sites/owu/Shared%20Documents/Install/Machine%20learning/Virtual%20environment/.venv.zip)
+   в папку з проектом `C:\inetpub\wwwroot\machine-learning\.venv`
+4. Скопіювати в зручне місце файли, що використовуються для роботи сервісу:
+   - модель
+   - словник
+   - класи
+   - користувацькі стоп слова (якщо використовуються)
+   - актуальне для моделі налаштування preprocessor_config.json
+5. Створити налаштування service_config.json і прописати актуальні значення шляхів до файлів
+
+##### Інсталяція через FastCGI handler
+
+6. Інсталювати CGI feature на сервері стандартним способом
+7. В IIS на рівні сервера додати налаштування FastCGI:
+   - Full Path: шлях до python.exe `C:\inetpub\wwwroot\machine-learning\.venv\Scripts\python.exe`
+   - Arguments: шлях до wfastcgi.py `C:\inetpub\wwwroot\machine-learning\.venv\Lib\site-packages\wfastcgi.py`
+   - Activity Timeout: 60 секкнд
+   - Idle Timeout: 600 секунд
+8. В IIS додати сайт з довільним портом і physical path - папка дистрибутиву `C:\inetpub\wwwroot\machine-learning`
+9. Додати в папку з дистрибутивом файл web.config з наступними налаштуваннями
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+   <system.webServer>
+      <handlers accessPolicy="Read, Script">
+         <remove name="CGI-exe"/>
+         <add name="FlaskHandler" path="*" verb="*" modules="FastCgiModule"
+              scriptProcessor="C:\inetpub\wwwroot\machine-learning\.venv\Scripts\python.exe|C:\inetpub\wwwroot\machine-learning\.venv\Lib\site-packages\wfastcgi.py"
+              resourceType="Unspecified" requireAccess="Script"/>
+      </handlers>
+   </system.webServer>
+
+   <appSettings>
+      <!-- Required settings -->
+      <add key="WSGI_HANDLER" value="ml_service.app"/>
+      <add key="PYTHONPATH" value="C:\inetpub\wwwroot\machine-learning\app\service"/>
+      <add key="ML_SERVICE_SETTINGS" value="C:\inetpub\wwwroot\machine-learning\service_config.json"/>
+
+      <!-- Optional settings -->
+      <add key="WSGI_LOG" value="C:\inetpub\wwwroot\machine-learning\wsgi-logs\ml_service.log"/>
+   </appSettings>
+</configuration>
+```
+
+10. Створити папку для логів WCGI в папці з дистрибутивом `C:\inetpub\wwwroot\machine-learning\wsgi-logs\ml_service.log`
+11. Надати права для користувача від імені якого працює сайт права на читання і редагування папки з дистрибутивом
+12. Перезавантажити сервер IIS
+
+##### Інсталяція через HttpPlatform handler
+
+6. Інсталювати `httpPlatformHandler_amd64.msi` на сервері
+7. В IIS додати сайт з довільним портом і physical path - папка дистрибутиву `C:\inetpub\wwwroot\machine-learning`
+8. Додати в папку з дистрибутивом файл web.config з наступними налаштуваннями
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+   <system.webServer>
+      <handlers>
+         <add name="PythonHandler" path="*" verb="*" modules="httpPlatformHandler" resourceType="Unspecified"/>
+      </handlers>
+      <httpPlatform processPath="C:\inetpub\wwwroot\machine-learning\.venv\Scripts\python.exe"
+                    arguments="C:\inetpub\wwwroot\machine-learning-alt\app\service\ml_service.py"
+                    stdoutLogEnabled="true"
+                    stdoutLogFile="C:\inetpub\wwwroot\machine-learning-alt\http-logs\http_service.log"
+                    startupTimeLimit="60"
+                    processesPerApplication="1">
+         <environmentVariables>
+            <environmentVariable name="SERVER_PORT" value="%HTTP_PLATFORM_PORT%"/>
+            <environmentVariable name="ML_SERVICE_SETTINGS"
+                                 value="C:\inetpub\wwwroot\machine-learning-alt\service_config.json"/>
+         </environmentVariables>
+      </httpPlatform>
+   </system.webServer>
+</configuration>
+```
+
+9. Створити папку для логів http в папці з
+   дистрибутивом `C:\inetpub\wwwroot\machine-learning\http-logs\http_service.log`
+10. Надати права для користувача від імені якого працює сайт права на читання і редагування папки з дистрибутивом
+11. Перезавантажити сервер IIS
