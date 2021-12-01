@@ -3,7 +3,6 @@ from typing import Union
 
 import numpy as np
 import pandas as pd
-from flashtext import KeywordProcessor
 from tensorflow.keras.models import load_model, Sequential
 from tensorflow.keras.preprocessing.text import Tokenizer
 
@@ -18,16 +17,17 @@ log = logging.getLogger("model_initializer")
 
 
 class ServiceParameterPredictor:
-    def __init__(self, classes=None, stop_words=None, words_dict=None, model=None) -> None:
+    def __init__(self, classes=None, stop_words_cleaner=None, words_dict=None, model=None) -> None:
         self.classes = classes
-        self.stop_words = stop_words
+        self.stop_words_cleaner: StopWordsCleaner = stop_words_cleaner
         self.words_dict = words_dict
         self.model = model
         self.preprocessed_text = ""
         self.text_sequence = None
 
     def preprocess_text(self, text: str, preprocessor_settings: PreprocessorSetting) -> str:
-        return clean_text_with_setting(text, preprocessor_settings, self.stop_words)
+        return clean_text_with_setting(text, preprocessor_settings, self.stop_words_cleaner.processor,
+                                       self.stop_words_cleaner.default_stop_words)
 
     def _preprocess_prediction(self, prediction: np.ndarray, top_n=5) -> Union[pd.DataFrame, None]:
         if prediction.shape[0] == 0:
@@ -73,7 +73,7 @@ def load_classes(file_path: str) -> pd.DataFrame:
     return classes
 
 
-def load_stop_words(preprocessor_setting: PreprocessorSetting) -> KeywordProcessor:
+def load_stop_words(preprocessor_setting: PreprocessorSetting) -> StopWordsCleaner:
     stop_words_setting = preprocessor_setting.stop_words_settings
     if preprocessor_setting.use_words_lemmatization:
         lemmatize_russian = preprocessor_setting.words_lemmatization_setting.russian
@@ -81,29 +81,34 @@ def load_stop_words(preprocessor_setting: PreprocessorSetting) -> KeywordProcess
     else:
         lemmatize_russian = False
         lemmatize_ukrainian = False
-    if preprocessor_setting.clean_stop_words:
+    if not preprocessor_setting.clean_stop_words:
         stop_words_setting.use_uk_stop_words = False
         stop_words_setting.use_ru_stop_words = False
+        stop_words_setting.alt_stop_words_file = ""
         stop_words_setting.custom_stop_words_path = ""
         stop_words_setting.use_file_cleanup = None
     cleaner = StopWordsCleaner(load_uk=stop_words_setting.use_uk_stop_words,
                                load_ru=stop_words_setting.use_ru_stop_words,
+                               alt_stop_words_file=stop_words_setting.alt_stop_words_file,
                                custom_path=stop_words_setting.custom_stop_words_path,
                                use_file_cleanup=stop_words_setting.use_file_cleanup,
                                cleanup_function=text_utils.clean_text,
                                lemmatize_russian=lemmatize_russian,
                                lemmatize_ukrainian=lemmatize_ukrainian)
-    stop_words_processor = cleaner.fit_text()
-    log.info("Total stop words: {}".format(len(stop_words_processor)))
-    return stop_words_processor
+    if preprocessor_setting.clean_stop_words:
+        cleaner.fit_text()
+        log.info("Total stop words: {}".format(len(cleaner.default_stop_words) + len(cleaner.processor)))
+    return cleaner
 
 
 def init_predictor(service_setting: ServiceSetting,
                    preprocessor_setting: PreprocessorSetting) -> ServiceParameterPredictor:
     log.info("==> Service parameter predictor initialization")
     classes = load_classes(service_setting.classes_path)
-    stop_words = load_stop_words(preprocessor_setting)
+    stop_words = None
+    if preprocessor_setting.clean_stop_words:
+        stop_words = load_stop_words(preprocessor_setting)
     word_dict = load_dictionary(service_setting.dict_path)
     model = load_keras_model(service_setting.model_path)
     log.info("==> Service parameter predictor initialized")
-    return ServiceParameterPredictor(classes=classes, stop_words=stop_words, words_dict=word_dict, model=model)
+    return ServiceParameterPredictor(classes=classes, stop_words_cleaner=stop_words, words_dict=word_dict, model=model)

@@ -19,6 +19,7 @@ matplotlib = "3.4.1"
 tensorflow-cpu = "==2.4.1"
 flask = "==2.0.0"
 werkzeug = "==2.0.1"
+wfastcgi = "==3.0.0"
 
 [dev-packages]
 jupyter = "1.0.0"
