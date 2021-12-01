@@ -59,6 +59,11 @@ def log_response_info(response: Response) -> Response:
     return response
 
 
+@app.get('/')
+def root_response() -> Response:
+    return Response(response='Machine learning service', status=200)
+
+
 @app.get('/health')
 def check_health() -> Response:
     return jsonify('status: UP')
@@ -98,20 +103,20 @@ def init_service(service_setting: ServiceSetting, preprocessor_setting: Preproce
     log.info("==> Service initialized")
 
 
+if len(sys.argv) == 2:
+    setting_path = str(sys.argv[1])
+elif os.getenv(SERVICE_CONFIG) != "":
+    setting_path = os.getenv(SERVICE_CONFIG)
+else:
+    raise ValueError(f'Can not find service setting')
+service_settings: ServiceSetting = get_setting(setting_path, SettingType.service)
+preprocessor_settings: PreprocessorSetting = get_setting(service_settings.preprocessor_settings_path,
+                                                         SettingType.cleaner)
+logger_utils.init_logging(service_settings.log_path + "\\" + service_settings.name)
+log.info(f'Using service:\n{json.dumps(service_settings.__dict__, default=lambda x: x.__dict__)}')
+log.info(f'Using preprocessor:\n{json.dumps(preprocessor_settings.__dict__, default=lambda x: x.__dict__)}')
+init_service(service_settings, preprocessor_settings)
+atexit.register(on_exit_app)
+
 if __name__ == "__main__":
-    if len(sys.argv) == 2:
-        setting_path = str(sys.argv[1])
-    elif os.getenv(SERVICE_CONFIG) != "":
-        setting_path = os.getenv(SERVICE_CONFIG)
-    else:
-        raise ValueError(f'Can not find service setting')
-    service_settings: ServiceSetting = get_setting(setting_path, SettingType.service)
-    preprocessor_settings: PreprocessorSetting = get_setting(service_settings.preprocessor_settings_path,
-                                                             SettingType.cleaner)
-    logger_utils.init_logging(service_settings.log_path + "\\" + service_settings.name)
-    log.info(f'Using service:\n{json.dumps(service_settings.__dict__, default=lambda x: x.__dict__)}')
-    log.info(f'Using preprocessor:\n{json.dumps(preprocessor_settings.__dict__, default=lambda x: x.__dict__)}')
-    init_service(service_settings, preprocessor_settings)
     app.run(debug=False, threaded=True)
-    atexit.register(on_exit_app)
-    log.info("Flask server started!")

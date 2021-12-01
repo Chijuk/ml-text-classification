@@ -33,7 +33,7 @@ def data_preprocess(setting: PreprocessorSetting, custom_stop_words: KeywordProc
     save_dataset(data, setting.output_data_path)
 
 
-def process_duplicates(data: pd.DataFrame, group_column: str, drop_all: True, class_list: []) -> pd.DataFrame:
+def process_duplicates(data: pd.DataFrame, group_column: str, drop_all=True, class_list=None) -> pd.DataFrame:
     if drop_all:
         classes = data[group_column].unique()
         log.info(f'Drop duplicates for all dataset within column: {group_column}')
