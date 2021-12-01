@@ -21,6 +21,7 @@ os.environ['TF_XLA_FLAGS'] = '--tf_xla_enable_xla_devices'
 log = logging.getLogger("ml_service")
 
 SERVICE_CONFIG = "ML_SERVICE_SETTINGS"
+SERVER_PORT = "SERVER_PORT"
 service_settings: ServiceSetting = None
 preprocessor_settings: PreprocessorSetting = None
 predictor: ServiceParameterPredictor = None
@@ -119,4 +120,7 @@ init_service(service_settings, preprocessor_settings)
 atexit.register(on_exit_app)
 
 if __name__ == "__main__":
-    app.run(debug=False, threaded=True)
+    if os.getenv(SERVER_PORT) != "":
+        app.run(port=os.getenv(SERVER_PORT), debug=False, threaded=True)
+    else:
+        app.run(debug=False, threaded=True)
