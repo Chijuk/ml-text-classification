@@ -240,23 +240,26 @@ ____
 
 #### Deployment
 
-Для прикладу "machine-learning" назва папки, де знаходиться актуальний дистрибутив.
+Для прикладу `machine-learning` назва папки, де знаходиться актуальний дистрибутив.
 
-1. Інсталювати CGI feature на сервері стандартним способом
-2. Скопіювати останню версію дистрибутиву сервісу на сервер в папку `C:\inetpub\wwwroot\machine-learning`
-3. Скачати готову модель для розпізнавання мови
+1. Скопіювати останню версію дистрибутиву сервісу на сервер в папку `C:\inetpub\wwwroot\machine-learning`
+2. Скачати готову модель для розпізнавання мови
    за [посиланням](https://omniwayukraine.sharepoint.com/sites/owu/Shared%20Documents/Install/Machine%20learning/fasttext/lid.176.bin)
    в папку `C:\inetpub\wwwroot\machine-learning\resources\bin`
-4. Скачати бібліотеки для роботи сервісу
+3. Скачати бібліотеки для роботи сервісу
    за [посиланням](https://omniwayukraine.sharepoint.com/sites/owu/Shared%20Documents/Install/Machine%20learning/Virtual%20environment/.venv.zip)
    в папку з проектом `C:\inetpub\wwwroot\machine-learning\.venv`
-5. Скопіювати в зручне місце файли, що використовуються для роботи сервісу:
+4. Скопіювати в зручне місце файли, що використовуються для роботи сервісу:
    - модель
    - словник
    - класи
    - користувацькі стоп слова (якщо використовуються)
    - актуальне для моделі налаштування preprocessor_config.json
-6. Створити налаштування service_config.json і прописати актуальні значення шляхів до файлів
+5. Створити налаштування service_config.json і прописати актуальні значення шляхів до файлів
+
+##### Інсталяція через FastCGI handler
+
+6. Інсталювати CGI feature на сервері стандартним способом
 7. В IIS на рівні сервера додати налаштування FastCGI:
    - Full Path: шлях до python.exe `C:\inetpub\wwwroot\machine-learning\.venv\Scripts\python.exe`
    - Arguments: шлях до wfastcgi.py `C:\inetpub\wwwroot\machine-learning\.venv\Lib\site-packages\wfastcgi.py`
@@ -290,5 +293,38 @@ ____
 ```
 
 10. Створити папку для логів WCGI в папці з дистрибутивом `C:\inetpub\wwwroot\machine-learning\wsgi-logs\ml_service.log`
-12. Надати права для користувача від імені якого працює сайт права на читання і редагування папки з дистрибутивом
+11. Надати права для користувача від імені якого працює сайт права на читання і редагування папки з дистрибутивом
+12. Перезавантажити сервер IIS
 
+##### Інсталяція через HttpPlatform handler
+
+6. Інсталювати `httpPlatformHandler_amd64.msi` на сервері
+7. В IIS додати сайт з довільним портом і physical path - папка дистрибутиву `C:\inetpub\wwwroot\machine-learning`
+8. Додати в папку з дистрибутивом файл web.config з наступними налаштуваннями
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+  <system.webServer>
+    <handlers>
+      <add name="PythonHandler" path="*" verb="*" modules="httpPlatformHandler" resourceType="Unspecified"/>
+    </handlers>
+    <httpPlatform processPath="C:\inetpub\wwwroot\machine-learning\.venv\Scripts\python.exe"
+                  arguments="C:\inetpub\wwwroot\machine-learning-alt\app\service\ml_service.py"
+                  stdoutLogEnabled="true"
+                  stdoutLogFile="C:\inetpub\wwwroot\machine-learning-alt\http-logs\http_service.log"
+                  startupTimeLimit="60"
+                  processesPerApplication="1">
+      <environmentVariables>
+        <environmentVariable name="SERVER_PORT" value="%HTTP_PLATFORM_PORT%" />
+		<environmentVariable name="ML_SERVICE_SETTINGS" value="C:\inetpub\wwwroot\machine-learning-alt\service_config.json" />
+      </environmentVariables>
+    </httpPlatform>
+  </system.webServer>
+</configuration>
+```
+
+9. Створити папку для логів http в папці з
+   дистрибутивом `C:\inetpub\wwwroot\machine-learning\http-logs\http_service.log`
+10. Надати права для користувача від імені якого працює сайт права на читання і редагування папки з дистрибутивом
+11. Перезавантажити сервер IIS
