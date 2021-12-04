@@ -256,17 +256,20 @@ ____
    - користувацькі стоп слова (якщо використовуються)
    - актуальне для моделі налаштування preprocessor_config.json
 5. Створити налаштування service_config.json і прописати актуальні значення шляхів до файлів
+6. Інсталювати IIS Application Initialization feature на сервері стандартним способом
 
 ##### Інсталяція через FastCGI handler
 
-6. Інсталювати CGI feature на сервері стандартним способом
-7. В IIS на рівні сервера додати налаштування FastCGI:
+7. Інсталювати IIS CGI feature на сервері стандартним способом
+8. В IIS на рівні сервера додати налаштування FastCGI:
    - Full Path: шлях до python.exe `C:\inetpub\wwwroot\machine-learning\.venv\Scripts\python.exe`
    - Arguments: шлях до wfastcgi.py `C:\inetpub\wwwroot\machine-learning\.venv\Lib\site-packages\wfastcgi.py`
    - Activity Timeout: 60 секкнд
    - Idle Timeout: 600 секунд
-8. В IIS додати сайт з довільним портом і physical path - папка дистрибутиву `C:\inetpub\wwwroot\machine-learning`
-9. Додати в папку з дистрибутивом файл web.config з наступними налаштуваннями
+9. В IIS додати сайт з довільним портом і physical path - папка дистрибутиву `C:\inetpub\wwwroot\machine-learning`
+10. В налаштуваннях сайта змінити значення Preload Enabled на True
+11. В налаштуваннях відповідного application pool змінити значення Start Mode на AlwaysRunning
+12. Додати в папку з дистрибутивом файл web.config з наступними налаштуваннями
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -292,15 +295,17 @@ ____
 </configuration>
 ```
 
-10. Створити папку для логів WCGI в папці з дистрибутивом `C:\inetpub\wwwroot\machine-learning\wsgi-logs\ml_service.log`
-11. Надати права для користувача від імені якого працює сайт права на читання і редагування папки з дистрибутивом
-12. Перезавантажити сервер IIS
+13. Створити папку для логів WCGI в папці з дистрибутивом `C:\inetpub\wwwroot\machine-learning\wsgi-logs\ml_service.log`
+14. Надати права для користувача від імені якого працює сайт права на читання і редагування папки з дистрибутивом
+15. Перезавантажити сервер IIS
 
 ##### Інсталяція через HttpPlatform handler
 
-6. Інсталювати `httpPlatformHandler_amd64.msi` на сервері
-7. В IIS додати сайт з довільним портом і physical path - папка дистрибутиву `C:\inetpub\wwwroot\machine-learning`
-8. Додати в папку з дистрибутивом файл web.config з наступними налаштуваннями
+7. Інсталювати `httpPlatformHandler_amd64.msi` на сервері
+8. В IIS додати сайт з довільним портом і physical path - папка дистрибутиву `C:\inetpub\wwwroot\machine-learning`
+9. В налаштуваннях сайта змінити значення Preload Enabled на True
+10. В налаштуваннях відповідного application pool змінити значення Start Mode на AlwaysRunning
+11. Додати в папку з дистрибутивом файл web.config з наступними налаштуваннями
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -324,7 +329,7 @@ ____
 </configuration>
 ```
 
-9. Створити папку для логів http в папці з
-   дистрибутивом `C:\inetpub\wwwroot\machine-learning\http-logs\http_service.log`
-10. Надати права для користувача від імені якого працює сайт права на читання і редагування папки з дистрибутивом
-11. Перезавантажити сервер IIS
+12. Створити папку для логів http в папці з
+    дистрибутивом `C:\inetpub\wwwroot\machine-learning\http-logs\http_service.log`
+13. Надати права для користувача від імені якого працює сайт права на читання і редагування папки з дистрибутивом
+14. Перезавантажити сервер IIS
