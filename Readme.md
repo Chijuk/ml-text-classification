@@ -128,8 +128,7 @@ ____
 `'drop_duplicates_class_list'`<br/>
 Масив класів. Якщо масив не пустий (`[]`): дублікати будуть видалятись лише у вказаних класах<br/>
 `'min_words_count'`<br/>
-Мінімальна кількість допустимих слів. Якщо кількість менша за вказану — рядок видаляється. Значення: `0` - налаштування
-ігнорується<br/>
+Мінімальна кількість допустимих слів. Якщо кількість менша за вказану — рядок видаляється. Значення: `0` - налаштування ігнорується<br/>
 `'min_word_len'`<br/>
 Мінімальна кількість символів у слові. Якщо кількість менша за вказану — слово видаляється. Значення: `0` - налаштування
 ігнорується<br/>
@@ -257,76 +256,80 @@ ____
    - користувацькі стоп слова (якщо використовуються)
    - актуальне для моделі налаштування preprocessor_config.json
 5. Створити налаштування service_config.json і прописати актуальні значення шляхів до файлів
+6. Інсталювати IIS Application Initialization feature на сервері стандартним способом
 
 ##### Інсталяція через FastCGI handler
 
-6. Інсталювати CGI feature на сервері стандартним способом
-7. В IIS на рівні сервера додати налаштування FastCGI:
+7. Інсталювати IIS CGI feature на сервері стандартним способом
+8. В IIS на рівні сервера додати налаштування FastCGI:
    - Full Path: шлях до python.exe `C:\inetpub\wwwroot\machine-learning\.venv\Scripts\python.exe`
    - Arguments: шлях до wfastcgi.py `C:\inetpub\wwwroot\machine-learning\.venv\Lib\site-packages\wfastcgi.py`
    - Activity Timeout: 60 секкнд
    - Idle Timeout: 600 секунд
-8. В IIS додати сайт з довільним портом і physical path - папка дистрибутиву `C:\inetpub\wwwroot\machine-learning`
-9. Додати в папку з дистрибутивом файл web.config з наступними налаштуваннями
+9. В IIS додати сайт з довільним портом і physical path - папка дистрибутиву `C:\inetpub\wwwroot\machine-learning`
+10. В налаштуваннях сайта змінити значення Preload Enabled на True
+11. В налаштуваннях відповідного application pool змінити значення Start Mode на AlwaysRunning
+12. Додати в папку з дистрибутивом файл web.config з наступними налаштуваннями
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-   <system.webServer>
-      <handlers accessPolicy="Read, Script">
-         <remove name="CGI-exe"/>
-         <add name="FlaskHandler" path="*" verb="*" modules="FastCgiModule"
-              scriptProcessor="C:\inetpub\wwwroot\machine-learning\.venv\Scripts\python.exe|C:\inetpub\wwwroot\machine-learning\.venv\Lib\site-packages\wfastcgi.py"
-              resourceType="Unspecified" requireAccess="Script"/>
-      </handlers>
-   </system.webServer>
+    <system.webServer>
+        <handlers accessPolicy="Read, Script">
+            <remove name="CGI-exe" />
+            <add name="FlaskHandler" path="*" verb="*" modules="FastCgiModule" 
+			scriptProcessor="C:\inetpub\wwwroot\machine-learning\.venv\Scripts\python.exe|C:\inetpub\wwwroot\machine-learning\.venv\Lib\site-packages\wfastcgi.py" 
+			resourceType="Unspecified" requireAccess="Script" />
+        </handlers>
+    </system.webServer>
+	
+	<appSettings>
+    <!-- Required settings -->
+    <add key="WSGI_HANDLER" value="ml_service.app" />
+    <add key="PYTHONPATH" value="C:\inetpub\wwwroot\machine-learning\app\service" />
+    <add key="ML_SERVICE_SETTINGS" value="C:\inetpub\wwwroot\machine-learning\service_config.json" />
 
-   <appSettings>
-      <!-- Required settings -->
-      <add key="WSGI_HANDLER" value="ml_service.app"/>
-      <add key="PYTHONPATH" value="C:\inetpub\wwwroot\machine-learning\app\service"/>
-      <add key="ML_SERVICE_SETTINGS" value="C:\inetpub\wwwroot\machine-learning\service_config.json"/>
-
-      <!-- Optional settings -->
-      <add key="WSGI_LOG" value="C:\inetpub\wwwroot\machine-learning\wsgi-logs\ml_service.log"/>
-   </appSettings>
+    <!-- Optional settings -->
+    <add key="WSGI_LOG" value="C:\inetpub\wwwroot\machine-learning\wsgi-logs\ml_service.log" />
+  </appSettings>
 </configuration>
 ```
 
-10. Створити папку для логів WCGI в папці з дистрибутивом `C:\inetpub\wwwroot\machine-learning\wsgi-logs\ml_service.log`
-11. Надати права для користувача від імені якого працює сайт права на читання і редагування папки з дистрибутивом
-12. Перезавантажити сервер IIS
+13. Створити папку для логів WCGI в папці з дистрибутивом `C:\inetpub\wwwroot\machine-learning\wsgi-logs\ml_service.log`
+14. Надати права для користувача від імені якого працює сайт права на читання і редагування папки з дистрибутивом
+15. Перезавантажити сервер IIS
 
 ##### Інсталяція через HttpPlatform handler
 
-6. Інсталювати `httpPlatformHandler_amd64.msi` на сервері
-7. В IIS додати сайт з довільним портом і physical path - папка дистрибутиву `C:\inetpub\wwwroot\machine-learning`
-8. Додати в папку з дистрибутивом файл web.config з наступними налаштуваннями
+7. Інсталювати `httpPlatformHandler_amd64.msi` на сервері
+8. В IIS додати сайт з довільним портом і physical path - папка дистрибутиву `C:\inetpub\wwwroot\machine-learning`
+9. В налаштуваннях сайта змінити значення Preload Enabled на True
+10. В налаштуваннях відповідного application pool змінити значення Start Mode на AlwaysRunning
+11. Додати в папку з дистрибутивом файл web.config з наступними налаштуваннями
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
 <configuration>
-   <system.webServer>
-      <handlers>
-         <add name="PythonHandler" path="*" verb="*" modules="httpPlatformHandler" resourceType="Unspecified"/>
-      </handlers>
-      <httpPlatform processPath="C:\inetpub\wwwroot\machine-learning\.venv\Scripts\python.exe"
-                    arguments="C:\inetpub\wwwroot\machine-learning-alt\app\service\ml_service.py"
-                    stdoutLogEnabled="true"
-                    stdoutLogFile="C:\inetpub\wwwroot\machine-learning-alt\http-logs\http_service.log"
-                    startupTimeLimit="60"
-                    processesPerApplication="1">
-         <environmentVariables>
-            <environmentVariable name="SERVER_PORT" value="%HTTP_PLATFORM_PORT%"/>
-            <environmentVariable name="ML_SERVICE_SETTINGS"
-                                 value="C:\inetpub\wwwroot\machine-learning-alt\service_config.json"/>
-         </environmentVariables>
-      </httpPlatform>
-   </system.webServer>
+  <system.webServer>
+    <handlers>
+      <add name="PythonHandler" path="*" verb="*" modules="httpPlatformHandler" resourceType="Unspecified"/>
+    </handlers>
+    <httpPlatform processPath="C:\inetpub\wwwroot\machine-learning\.venv\Scripts\python.exe"
+                  arguments="C:\inetpub\wwwroot\machine-learning-alt\app\service\ml_service.py"
+                  stdoutLogEnabled="true"
+                  stdoutLogFile="C:\inetpub\wwwroot\machine-learning-alt\http-logs\http_service.log"
+                  startupTimeLimit="60"
+                  processesPerApplication="1">
+      <environmentVariables>
+        <environmentVariable name="SERVER_PORT" value="%HTTP_PLATFORM_PORT%" />
+		<environmentVariable name="ML_SERVICE_SETTINGS" value="C:\inetpub\wwwroot\machine-learning-alt\service_config.json" />
+      </environmentVariables>
+    </httpPlatform>
+  </system.webServer>
 </configuration>
 ```
 
-9. Створити папку для логів http в папці з
-   дистрибутивом `C:\inetpub\wwwroot\machine-learning\http-logs\http_service.log`
-10. Надати права для користувача від імені якого працює сайт права на читання і редагування папки з дистрибутивом
-11. Перезавантажити сервер IIS
+12. Створити папку для логів http в папці з
+    дистрибутивом `C:\inetpub\wwwroot\machine-learning\http-logs\http_service.log`
+13. Надати права для користувача від імені якого працює сайт права на читання і редагування папки з дистрибутивом
+14. Перезавантажити сервер IIS
