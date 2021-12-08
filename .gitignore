@@ -135,3 +135,6 @@ dmypy.json
 data
 experiments
 resources/bin
+/.venv.zip
+/projects/machine-learning/
+/notebooks/tests.ipynb
