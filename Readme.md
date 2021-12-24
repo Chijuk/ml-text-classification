@@ -243,12 +243,8 @@ ____
 Для прикладу `machine-learning` назва папки, де знаходиться актуальний дистрибутив.
 
 1. Скопіювати останню версію дистрибутиву сервісу на сервер в папку `C:\inetpub\wwwroot\machine-learning`
-2. Скачати готову модель для розпізнавання мови
-   за [посиланням](https://omniwayukraine.sharepoint.com/sites/owu/Shared%20Documents/Install/Machine%20learning/fasttext/lid.176.bin)
-   в папку `C:\inetpub\wwwroot\machine-learning\resources\bin`
-3. Скачати бібліотеки для роботи сервісу
-   за [посиланням](https://omniwayukraine.sharepoint.com/sites/owu/Shared%20Documents/Install/Machine%20learning/Virtual%20environment/.venv.zip)
-   в папку з проектом `C:\inetpub\wwwroot\machine-learning\.venv`
+2. Скачати готову модель для розпізнавання мови в папку `C:\inetpub\wwwroot\machine-learning\resources\bin`
+3. Скачати бібліотеки для роботи сервісу в папку з проектом `C:\inetpub\wwwroot\machine-learning\.venv`
 4. Скопіювати в зручне місце файли, що використовуються для роботи сервісу:
    - модель
    - словник

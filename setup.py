@@ -17,10 +17,7 @@ setup(
         'bin': ['*.bin'],
         'stop_words': ['*.txt'],
     },
-    url='https://omniway.ua',
-    license='Omniway',
-    author='Evgeniy Chumak',
-    author_email='evgeniy.chumak@omniway.ua',
+    author='Chijuk',
     description='Machine learning tools',
     python_requires='==3.8',
     platform='win-amd64'

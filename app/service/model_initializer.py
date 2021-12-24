@@ -41,7 +41,7 @@ class ServiceParameterPredictor:
             result['class_id'] = self.classes['class_id']
             result['class_name'] = self.classes['class_name']
             result['probability'] = prediction[0] * 100
-            result['probability'] = result['probability'].astype(int)  # oschadbank
+            result['probability'] = result['probability'].astype(int)
             return result.sort_values(by=['probability'], ascending=False).head(top_n)
 
     def get_prediction(self, text: str, top_n_predictions: int) -> Union[pd.DataFrame, None]:
